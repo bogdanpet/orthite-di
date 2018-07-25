@@ -24,7 +24,7 @@ class Container
 
     public function has($key)
     {
-        return $key;
+        return array_key_exists($key, $this->pool);
     }
 
     protected function resolve($class, $params = [])
