@@ -171,4 +171,17 @@ class Container
             die('Method ' . $class . '::' . $method . ' does not exist.');
         }
     }
+
+    /**
+     * Add multiple declarations to container pool.
+     * Ideal when reading from configuration files.
+     *
+     * @param array $config
+     */
+    public function build(array $config)
+    {
+        foreach ($config as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
 }
