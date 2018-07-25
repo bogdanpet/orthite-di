@@ -8,9 +8,13 @@ class Container
 
     protected $pool = [];
 
-    public function get($key)
+    public function get($key, $params = [])
     {
-        return $key;
+        if ($this->has($key)) {
+            return $this->pool[$key];
+        }
+
+        return $this->resolve($key, $params);
     }
 
     public function set($key, $value)
@@ -23,12 +27,12 @@ class Container
         return $key;
     }
 
-    public function resolve($class, $params = [])
+    protected function resolve($class, $params = [])
     {
         return $class;
     }
 
-    public function resolveMethod($class, $method, $params = [])
+    public function call($class, $method, $params = [])
     {
         return $class;
     }
