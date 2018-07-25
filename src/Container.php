@@ -32,6 +32,12 @@ class Container
         // Create a reflection of a class
         $reflection = new \ReflectionClass($class);
 
+        // Check if class is instantiable
+        if (!$reflection->isInstantiable()) {
+            // TODO: Add exception
+            die('Class is not instantiable');
+        }
+
         // Get class constructor
         $constructor = $reflection->getConstructor();
 
@@ -50,11 +56,6 @@ class Container
         $dependencies = $this->resolveDependencies($constructorParams, $params);
 
         return $reflection->newInstanceArgs($dependencies);
-    }
-
-    public function call($class, $method, $params = [])
-    {
-        return $class;
     }
 
     private function resolveDependencies($constructorParams, $params)
@@ -87,5 +88,32 @@ class Container
         }
 
         return $dependencies;
+    }
+
+    public function call($class, $method, $params = [])
+    {
+        $object = $this->get($class, $params);
+
+        if (method_exists($object, $method)) {
+            $reflection = new \ReflectionMethod($class, $method);
+
+            if (!$reflection->isPublic()) {
+                // TODO: Add exception
+                die('Method ' . $class . '::' . $method . ' is not accessible.');
+            }
+
+            $methodParams = $reflection->getParameters();
+
+            if (empty($methodParams)) {
+                return $reflection->invoke($object);
+            }
+
+            $dependencies = $this->resolveDependencies($methodParams, $params);
+
+            return $reflection->invokeArgs($object, $dependencies);
+        } else {
+            // TODO: Add exception
+            die('Method ' . $class . '::' . $method . ' does not exist.');
+        }
     }
 }
