@@ -6,27 +6,60 @@ namespace Orthite\DI;
 class Container
 {
 
+    /**
+     * Holds the resolved objects for reusing.
+     *
+     * @var array
+     */
     protected $pool = [];
 
+    /**
+     * Get the  object from the pool if it exists, or try to resolve it.
+     *
+     * @param string $key
+     * @param array $params
+     * @return mixed|object
+     */
     public function get($key, $params = [])
     {
+        // If object is in pool return it.
         if ($this->has($key)) {
             return $this->pool[$key];
         }
 
+        // Otherwise proceed with resolving
         return $this->resolve($key, $params);
     }
 
+    /**
+     * Add element to the pool.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
     public function set($key, $value)
     {
         $this->pool[$key] = $value;
     }
 
+    /**
+     * Check if element exist in the pool.
+     *
+     * @param string $key
+     * @return bool
+     */
     public function has($key)
     {
         return array_key_exists($key, $this->pool);
     }
 
+    /**
+     * Resolve the class with dependencies and return the new instance.
+     *
+     * @param string $class
+     * @param array $params
+     * @return object
+     */
     protected function resolve($class, $params = [])
     {
         // Create a reflection of a class
@@ -58,11 +91,18 @@ class Container
         return $reflection->newInstanceArgs($dependencies);
     }
 
-    private function resolveDependencies($constructorParams, $params)
+    /**
+     * Resolve function parameters. Constructor or method.
+     *
+     * @param array $functionParams
+     * @param array $params
+     * @return array
+     */
+    private function resolveDependencies($functionParams, $params)
     {
         $dependencies = [];
 
-        foreach ($constructorParams as $param) {
+        foreach ($functionParams as $param) {
             // Check if the value is passed through $params
             // This value should override the default
             if (array_key_exists($param->name, $params)) {
@@ -90,24 +130,39 @@ class Container
         return $dependencies;
     }
 
+    /**
+     * Resolve method and invoke it.
+     *
+     * @param string $class
+     * @param string $method
+     * @param array $params
+     * @return mixed
+     */
     public function call($class, $method, $params = [])
     {
+        // Resolve the class
         $object = $this->get($class, $params);
 
+        // Check if method exists and proceed with resolving
         if (method_exists($object, $method)) {
+            // Create method reflection
             $reflection = new \ReflectionMethod($class, $method);
 
+            // Check if method is public
             if (!$reflection->isPublic()) {
                 // TODO: Add exception
-                die('Method ' . $class . '::' . $method . ' is not accessible.');
+                die('Method ' . $class . '::' . $method . ' is not accessible. It is either private or protected');
             }
 
+            // Get method params
             $methodParams = $reflection->getParameters();
 
+            // If there is not method params invoke the method
             if (empty($methodParams)) {
                 return $reflection->invoke($object);
             }
 
+            // Otherwise resolve method's dependencies and invoke method
             $dependencies = $this->resolveDependencies($methodParams, $params);
 
             return $reflection->invokeArgs($object, $dependencies);
