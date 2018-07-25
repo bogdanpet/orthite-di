@@ -19,7 +19,7 @@ class Container
 
     public function set($key, $value)
     {
-        return $key;
+        $this->pool[$key] = $value;
     }
 
     public function has($key)
