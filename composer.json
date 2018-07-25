@@ -1,0 +1,16 @@
+{
+    "name": "bogdanpet/orthite-di",
+    "description": "Simple dependency injection container",
+    "authors": [
+        {
+            "name": "Bogdan Petkovic",
+            "email": "bgdnptkvc@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Orthite\\DI\\": "src/"
+        }
+    }
+}
