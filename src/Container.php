@@ -29,11 +29,63 @@ class Container
 
     protected function resolve($class, $params = [])
     {
-        return $class;
+        // Create a reflection of a class
+        $reflection = new \ReflectionClass($class);
+
+        // Get class constructor
+        $constructor = $reflection->getConstructor();
+
+        // If constructor is null (not exists) proceed with simple instantiation
+        // And put the object in pool for future use
+        if (is_null($constructor)) {
+            $instance = $reflection->newInstance();
+            $this->set($class, $instance);
+            return $instance;
+        }
+
+        // Otherwise get constructor params
+        $constructorParams = $constructor->getParameters();
+
+        // Try to resolve them and return the new instance with args
+        $dependencies = $this->resolveDependencies($constructorParams, $params);
+
+        return $reflection->newInstanceArgs($dependencies);
     }
 
     public function call($class, $method, $params = [])
     {
         return $class;
+    }
+
+    private function resolveDependencies($constructorParams, $params)
+    {
+        $dependencies = [];
+
+        foreach ($constructorParams as $param) {
+            // Check if the value is passed through $params
+            // This value should override the default
+            if (array_key_exists($param->name, $params)) {
+                $dependencies[] = $params[$param->name];
+            } else {
+                // Otherwise try to resolve it as class using type hinting
+                $dep = $param->getClass();
+
+                // If it is a class try to resolve it
+                if ($dep !== null) {
+                    $dependencies[] = $this->get($dep->name);
+                } else {
+                    // Otherwise check for default value
+                    if ($param->isDefaultValueAvailable()) {
+                        // get default value of parameter
+                        $dependencies[] = $param->getDefaultValue();
+                    } else {
+                        // TODO: Add exception
+                        die('Can\'t resolve parameter ' . $param->name);
+                    }
+                }
+            }
+        }
+
+        return $dependencies;
     }
 }
