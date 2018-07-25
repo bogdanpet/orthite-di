@@ -2,6 +2,8 @@
 
 namespace Orthite\DI;
 
+use Orthite\DI\Exceptions\DependencyResolverException;
+use Orthite\DI\Exceptions\MethodInvokerException;
 
 class Container
 {
@@ -59,16 +61,20 @@ class Container
      * @param string $class
      * @param array $params
      * @return object
+     * @throws DependencyResolverException
      */
     protected function resolve($class, $params = [])
     {
         // Create a reflection of a class
-        $reflection = new \ReflectionClass($class);
+        try {
+            $reflection = new \ReflectionClass($class);
+        } catch (\ReflectionException $e) {
+            throw new DependencyResolverException($e->getMessage(), $e->getCode());
+        }
 
         // Check if class is instantiable
         if (!$reflection->isInstantiable()) {
-            // TODO: Add exception
-            die('Class is not instantiable');
+            throw new DependencyResolverException('Class ' . $reflection->getName() . 'is not instantiable');
         }
 
         // Get class constructor
@@ -97,6 +103,7 @@ class Container
      * @param array $functionParams
      * @param array $params
      * @return array
+     * @throws DependencyResolverException
      */
     private function resolveDependencies($functionParams, $params)
     {
@@ -120,8 +127,7 @@ class Container
                         // get default value of parameter
                         $dependencies[] = $param->getDefaultValue();
                     } else {
-                        // TODO: Add exception
-                        die('Can\'t resolve parameter ' . $param->name);
+                        throw new DependencyResolverException('Can\'t resolve parameter ' . $param->name);
                     }
                 }
             }
@@ -137,6 +143,7 @@ class Container
      * @param string $method
      * @param array $params
      * @return mixed
+     * @throws MethodInvokerException
      */
     public function call($class, $method, $params = [])
     {
@@ -150,8 +157,7 @@ class Container
 
             // Check if method is public
             if (!$reflection->isPublic()) {
-                // TODO: Add exception
-                die('Method ' . $class . '::' . $method . ' is not accessible. It is either private or protected');
+                throw new MethodInvokerException('Method ' . $class . '::' . $method . ' is not accessible. It is either private or protected');
             }
 
             // Get method params
@@ -167,8 +173,7 @@ class Container
 
             return $reflection->invokeArgs($object, $dependencies);
         } else {
-            // TODO: Add exception
-            die('Method ' . $class . '::' . $method . ' does not exist.');
+            throw new MethodInvokerException('Method ' . $class . '::' . $method . ' does not exist.');
         }
     }
 
