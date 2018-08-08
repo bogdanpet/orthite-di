@@ -100,7 +100,7 @@ Without DI creating $user object will look like this.
 
 ```php
 $request = new Request();
-$pdo = new PDO($dsn, $username, $password);
+$pdo = new PDO($dsn, $username, $passwd);
 $db = new Database($pdo);
 $user = new User($request, $db);
 ```
@@ -118,14 +118,14 @@ Pass the array of parameters and Container will know where to put them. Keep in 
 $user = $container->get(User::class, [
     'dsn' => $dsn,
     'username' => $username,
-    'password' => $password
+    'passwd' => $passwd
 ]);
 ```
 or
 ```php
-$user = $container->get(User::class, compact('dsn', 'username', 'password');
+$user = $container->get(User::class, compact('dsn', 'username', 'passwd');
 ```
-Assuming that you have variables $dsn, $username and $password defined.
+Assuming that you have variables $dsn, $username and $passwd defined.
 
 ### Invoking a method from a class
 Same way you resolve classes, methods from classes can also be resolved. For example, let's say class User has a method show which displays user account details, and it depends on user's id and Response class.
