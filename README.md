@@ -105,7 +105,7 @@ $db = new Database($pdo);
 $user = new User($request, $db);
 ```
 
-Now imagine if there were more dependendcies with more dependencies. This is where auto resolving comes to aid. All you need is to call Container's get() method. If the object is not in the definitions container is try to resolve it using type hinting.
+Now imagine if there were more dependendcies with more dependencies. This is where auto resolving comes to aid. All you need is to call Container's get() method. If the object is not in the definitions container will try to resolve it using [type hinting](http://php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration).
 
 ```php
 $user = $container->get(User::class);
