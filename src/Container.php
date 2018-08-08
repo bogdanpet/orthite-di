@@ -120,7 +120,7 @@ class Container
 
                 // If it is a class try to resolve it
                 if ($dep !== null) {
-                    $dependencies[] = $this->get($dep->name);
+                    $dependencies[] = $this->get($dep->name, $params);
                 } else {
                     // Otherwise check for default value
                     if ($param->isDefaultValueAvailable()) {
