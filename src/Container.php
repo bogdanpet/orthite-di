@@ -5,7 +5,7 @@ namespace Orthite\DI;
 use Orthite\DI\Exceptions\DependencyResolverException;
 use Orthite\DI\Exceptions\MethodInvokerException;
 
-class Container
+class Container extends Singleton
 {
 
     /**
