@@ -26,7 +26,7 @@ class Container extends Singleton
     {
         // If object is in pool return it.
         if ($this->has($key)) {
-            return $this->pool[$key];
+            return $this->pool($this->pool[$key], $params);
         }
 
         // Otherwise proceed with resolving
@@ -74,6 +74,10 @@ class Container extends Singleton
 
         // Check if class is instantiable
         if (!$reflection->isInstantiable()) {
+            // Check if class is singleton
+            if ($reflection->isSubclassOf(Singleton::class)) {
+                return $class::getInstance();
+            }
             throw new DependencyResolverException('Class ' . $reflection->getName() . 'is not instantiable');
         }
 
@@ -188,5 +192,14 @@ class Container extends Singleton
         foreach ($config as $key => $value) {
             $this->set($key, $value);
         }
+    }
+
+    protected function pool($service, $params)
+    {
+        if ($service instanceof \Closure) {
+            return $service(...$params);
+        }
+
+        return $service;
     }
 }

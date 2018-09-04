@@ -7,18 +7,18 @@ namespace Orthite\DI;
 abstract class Singleton
 {
 
-    protected static $instance = null;
+    protected static $instances = [];
 
     protected function __construct()
     {
     }
 
     public static function getInstance() {
-        if (static::$instance == null) {
+        if (empty(static::$instances[static::class])) {
             $class = static::class;
-            static::$instance = new $class;
+            static::$instances[static::class] = new $class;
         }
 
-        return static::$instance;
+        return static::$instances[static::class];
     }
 }
